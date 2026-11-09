@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Sayandeep Pradhan | Full Stack Dev & UI Designer",
   description: "Computer Science Engineering student passionate about Full Stack Development, AI, and Cloud Technologies. Tech Lead at GameLiminals & Google Student Ambassador.",
+  verification: {
+    google: "cf4Xkiblsr-E7v7hHNbBGdRATGamFPyZ3hg22A8NUHI",
+  },
   keywords: [
     "Sayandeep Pradhan",
     "Full Stack Developer",
@@ -61,6 +65,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const gaId =
+    process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ||
+    process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID ||
+    "G-DSBL0RYG70";
+  const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Person",
@@ -100,6 +110,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <head>
+        <meta name="google-site-verification" content="cf4Xkiblsr-E7v7hHNbBGdRATGamFPyZ3hg22A8NUHI" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
@@ -134,8 +145,52 @@ export default function RootLayout({
             `,
           }}
         />
+
+        {/* Google Analytics 4 (GA4) */}
+        {gaId && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+              strategy="afterInteractive"
+            />
+            <Script id="google-analytics" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${gaId}', {
+                  page_path: window.location.pathname,
+                });
+              `}
+            </Script>
+          </>
+        )}
+
+        {/* Google Tag Manager (GTM) */}
+        {gtmId && (
+          <Script id="google-tag-manager" strategy="afterInteractive">
+            {`
+              (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+              new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+              'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+              })(window,document,'script','dataLayer','${gtmId}');
+            `}
+          </Script>
+        )}
       </head>
       <body className="antialiased min-h-screen" suppressHydrationWarning>
+        {/* Google Tag Manager (noscript fallback) */}
+        {gtmId && (
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+            />
+          </noscript>
+        )}
         {children}
       </body>
     </html>
