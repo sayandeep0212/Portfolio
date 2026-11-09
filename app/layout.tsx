@@ -58,6 +58,14 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon.webp", type: "image/webp" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: "/favicon.webp",
+  },
 };
 
 export default function RootLayout({
@@ -111,6 +119,9 @@ export default function RootLayout({
     <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <meta name="google-site-verification" content="cf4Xkiblsr-E7v7hHNbBGdRATGamFPyZ3hg22A8NUHI" />
+        <link rel="icon" href="/favicon.webp" type="image/webp" />
+        <link rel="alternate icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" href="/favicon.webp" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
