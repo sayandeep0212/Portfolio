@@ -1,0 +1,152 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-color: #ffffff;
+  --bg-card: #ffffff;
+  --bg-subtle: #fbfbfb;
+  --bg-pill: #f4f4f5;
+  --text-primary: #171717;
+  --text-secondary: #625b71;
+  --text-muted: #8b8793;
+  --accent-cyan: #00c0e8;
+  --accent-blue: #007f99;
+  --border-color: #f0f0f2;
+  --border-light: #f5f5f7;
+}
+
+.dark {
+  --bg-color: #0b0d11;
+  --bg-card: #13171f;
+  --bg-subtle: #181d26;
+  --bg-pill: #1f2530;
+  --text-primary: #f3f4f6;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  --accent-cyan: #38bdf8;
+  --accent-blue: #0ea5e9;
+  --border-color: #232936;
+  --border-light: #1c222e;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Headings exclusively use Instrument Serif in normal weight (no bold) for refined editorial minimalism */
+h1, h2, h3, h4, h5, h6, .font-serif, .heading-serif {
+  font-family: 'Instrument Serif', Georgia, serif !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.015em;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 9999px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #2a3241;
+}
+
+/* Keyframe animations */
+@keyframes pulse-dot {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.8; }
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes sound-bounce {
+  0% { height: 3px; }
+  100% { height: 16px; }
+}
+
+.sound-bar {
+  animation: sound-bounce 0.75s infinite alternate ease-in-out;
+}
+
+/* Performance optimizations for silky-smooth 60-120fps scrolling */
+.gpu-accel {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.content-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 400px;
+}
+
+/* Magic UI Animated Theme Toggler View Transition */
+html[data-magicui-theme-vt="active"]::view-transition-group(root) {
+  animation-duration: var(--magicui-theme-toggle-vt-duration, 400ms);
+}
+
+html[data-magicui-theme-vt="active"]::view-transition-old(root) {
+  mix-blend-mode: normal;
+  animation: none;
+  z-index: 1;
+}
+
+html[data-magicui-theme-vt="active"]::view-transition-new(root) {
+  mix-blend-mode: normal;
+  animation: none;
+  clip-path: var(--magicui-theme-vt-clip-from);
+  z-index: 9999;
+}
+
+/* Bulletproof Theme Banner Switching */
+.banner-light {
+  display: block;
+}
+.banner-dark {
+  display: none;
+}
+html.dark .banner-light {
+  display: none !important;
+}
+html.dark .banner-dark {
+  display: block !important;
+}
+
+/* Container Query Support for Foldable */
+@container (max-width: 320px) {
+  .\@max-xs\/foldable\:hidden {
+    display: none !important;
+  }
+  .\@max-xs\/foldable\:text-xs {
+    font-size: 0.75rem !important;
+    line-height: 1rem !important;
+  }
+  .\@max-xs\/foldable\:text-base {
+    font-size: 1rem !important;
+    line-height: 1.5rem !important;
+  }
+  .\@max-xs\/foldable\:gap-2 {
+    gap: 0.5rem !important;
+  }
+  .\@max-xs\/foldable\:border-2 {
+    border-width: 2px !important;
+  }
+}

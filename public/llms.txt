@@ -1,0 +1,20 @@
+# Sayandeep Pradhan - Portfolio
+
+> Full Stack Developer & UI Designer based in Kolkata, India. Tech Lead at GameLiminals and Google Student Ambassador.
+
+## Skills
+- Languages: TypeScript, JavaScript, Python, C, HTML, CSS
+- Frameworks: Next.js, React, Node.js, Tailwind CSS, Express
+- Tools: Git, GitHub, Docker, Firebase, Supabase, Redis
+- Interests: AI, Cybersecurity, Game Development, Full Stack Systems
+
+## Contact
+- Website: https://sayandeep.dev
+- Email: sayandeep0212@gmail.com
+- GitHub: https://github.com/sayandeep0212
+- LinkedIn: https://www.linkedin.com/in/sayandeep0212/
+- Twitter/X: https://x.com/sayandeep0212
+- Instagram: https://www.instagram.com/sayandeep0212/
+- YouTube: https://www.youtube.com/@SayandeepPradhan
+- Medium: https://medium.com/@sayandeep0212
+
