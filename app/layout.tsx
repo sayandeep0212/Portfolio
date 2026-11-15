@@ -61,11 +61,12 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/favicon.ico" },
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.png", type: "image/png" },
       { url: "/favicon.webp", type: "image/webp" },
     ],
     shortcut: "/favicon.ico",
-    apple: "/favicon.webp",
+    apple: "/apple-icon.png",
   },
 };
 
