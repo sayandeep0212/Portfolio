@@ -25,7 +25,7 @@ export default function About() {
 
         <div className="mt-4">
           <a
-            href="/resume.pdf"
+            href="https://drive.google.com/file/d/1qaAR_nLcrzytJob8-_ZVdMdnvD_CttJY/view?usp=sharing"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 text-[#00c0e8] dark:text-[#38bdf8] hover:text-[#007f99] dark:hover:text-[#7dd3fc] font-normal text-sm group transition-colors"

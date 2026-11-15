@@ -8,7 +8,6 @@ export default function Preloader() {
     <Skiper9
       columns={5}
       words={[
-        'STEP THROUGH THE GATE.',
         'WELCOME TO MY WORLD.',
       ]}
       interval={2100}

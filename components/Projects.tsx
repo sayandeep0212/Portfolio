@@ -100,18 +100,34 @@ export default function Projects() {
   }, [projectsList.length]);
 
 
+  // Display top 3 projects on homepage; full list viewable on /projects
+  const displayedProjects = projectsList.slice(0, 3);
+
   return (
     <section id="projects" className="pt-10 pb-6" ref={containerRef}>
       <FadeIn>
-        <h2 className="font-serif text-3xl sm:text-4xl font-normal tracking-tight text-gray-900 dark:text-white mb-1.5">
-          Projects
-        </h2>
-        <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-500 font-sans mb-6">
-          Selected work across web platforms, AI and desktop experiences.
-        </p>
+        <div className="flex items-end justify-between mb-1.5">
+          <div>
+            <h2 className="font-serif text-3xl sm:text-4xl font-normal tracking-tight text-gray-900 dark:text-white">
+              Projects
+            </h2>
+            <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-500 font-sans mt-1">
+              Selected work across web platforms, AI and desktop experiences.
+            </p>
+          </div>
+          {projectsList.length > 3 && (
+            <Link
+              href="/projects"
+              className="text-xs sm:text-sm font-mono text-[#007f99] dark:text-[#38bdf8] hover:underline flex items-center gap-1 group pb-1"
+            >
+              <span>See all ({projectsList.length})</span>
+              <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+            </Link>
+          )}
+        </div>
 
         {/* Timeline Container with interactive scroll-driven bar */}
-        <div className="relative pl-12 sm:pl-16">
+        <div className="relative pl-12 sm:pl-16 mt-6">
           {/* Top Badge: Concentric blue glowing rings with Code Icon matching reference design */}
           <div className="absolute left-0 top-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-[#2563eb] dark:border-[#3b82f6] bg-[#2563eb] dark:bg-[#0c1427] flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.5)] z-20">
             <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-white/60 dark:border-[#60a5fa]/80 flex items-center justify-center bg-[#2563eb] dark:bg-[#0d1b38]/50">
@@ -141,8 +157,9 @@ export default function Projects() {
 
           {/* Project Items */}
           <div className="space-y-8 pt-1">
-            {projectsList.map((p, idx) => {
-              const isActive = progress >= p.threshold;
+            {displayedProjects.map((p, idx) => {
+              const itemThreshold = (idx + 1) / (displayedProjects.length + 1);
+              const isActive = progress >= itemThreshold;
               const linkUrl = p.href || p.github;
 
               return (
@@ -221,10 +238,10 @@ export default function Projects() {
           <div className="pt-4">
             <Link
               href="/projects"
-              className="inline-flex items-center gap-1 text-[#00c0e8] dark:text-[#38bdf8] hover:text-[#007f99] dark:hover:text-[#7dd3fc] font-normal text-xs group transition-colors"
+              className="inline-flex items-center gap-1.5 text-[#00c0e8] dark:text-[#38bdf8] hover:text-[#007f99] dark:hover:text-[#7dd3fc] font-normal text-xs group transition-colors"
             >
               <span className="font-medium underline underline-offset-4 decoration-[#00c0e8]/30 group-hover:decoration-[#00c0e8]">
-                See more projects
+                See all {projectsList.length} projects
               </span>
               <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1 ml-0.5 inline-block" />
             </Link>

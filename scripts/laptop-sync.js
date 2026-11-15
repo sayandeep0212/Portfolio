@@ -44,6 +44,8 @@ const TARGET_URLS = [
   'http://localhost:3000',
   process.env.NEXT_PUBLIC_PORTFOLIO_URL,
   'https://sayandeep0212.vercel.app',
+  'https://sayandeep.dev',
+  'https://sayandeep.tech',
 ].filter(Boolean);
 
 async function sendPulse() {
@@ -65,6 +67,13 @@ async function sendPulse() {
     console.log(`[${new Date().toLocaleTimeString()}] ✅ Laptop ONLINE heartbeat -> Firestore analytics/device (timestamp: ${now})`);
   } catch (dbErr) {
     console.error('Firestore write error:', dbErr.message);
+    // Immediate retry after 3s on error
+    setTimeout(async () => {
+      try {
+        const docRef = doc(db, 'analytics', 'device');
+        await setDoc(docRef, { lastSeen: Date.now(), device: 'Windows Laptop', platform: 'win32' }, { merge: true });
+      } catch {}
+    }, 3000);
   }
 
   // 2. Also notify API heartbeat endpoint
@@ -83,8 +92,8 @@ async function sendPulse() {
 // Initial pulse immediately
 sendPulse();
 
-// Repeat pulse every 20 seconds
-const interval = setInterval(sendPulse, 20000);
+// Repeat pulse every 15 seconds (keeps status reliably online without gaps)
+const interval = setInterval(sendPulse, 15000);
 
 process.on('SIGINT', () => {
   clearInterval(interval);

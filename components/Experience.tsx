@@ -92,12 +92,31 @@ export default function Experience() {
     return () => ctx.revert();
   }, [experiences.length]);
 
+  // Display top 3 roles on homepage; full list viewable on /experience
+  const displayedExperiences = experiences.slice(0, 3);
+
   return (
     <section id="experience" className="pt-10 pb-6" ref={containerRef}>
       <FadeIn>
-        <h2 className="font-serif text-3xl sm:text-4xl font-normal tracking-tight text-gray-900 dark:text-white mb-6">
-          Experience
-        </h2>
+        <div className="flex items-end justify-between mb-6">
+          <div>
+            <h2 className="font-serif text-3xl sm:text-4xl font-normal tracking-tight text-gray-900 dark:text-white mb-1.5">
+              Experience
+            </h2>
+            <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-500 font-sans">
+              Leadership roles, community building, and technical leadership.
+            </p>
+          </div>
+          {experiences.length > 3 && (
+            <Link
+              href="/experience"
+              className="text-xs sm:text-sm font-mono text-[#007f99] dark:text-[#38bdf8] hover:underline flex items-center gap-1 group pb-1"
+            >
+              <span>See all ({experiences.length})</span>
+              <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+            </Link>
+          )}
+        </div>
 
         {/* Timeline Container with interactive scroll-driven bar */}
         <div className="relative pl-12 sm:pl-16">
@@ -130,8 +149,9 @@ export default function Experience() {
 
           {/* Experience Cards */}
           <div className="space-y-10 pt-1">
-            {experiences.map((exp, idx) => {
-              const isActive = progress >= exp.threshold;
+            {displayedExperiences.map((exp, idx) => {
+              const itemThreshold = (idx + 1) / (displayedExperiences.length + 1);
+              const isActive = progress >= itemThreshold;
               return (
                 <div key={exp.id || idx} className="relative group">
                   {/* Milestone Node on the vertical bar */}
@@ -202,10 +222,10 @@ export default function Experience() {
           <div className="pt-4">
             <Link
               href="/experience"
-              className="inline-flex items-center gap-1 text-[#00c0e8] dark:text-[#38bdf8] hover:text-[#007f99] dark:hover:text-[#7dd3fc] font-normal text-xs group transition-colors"
+              className="inline-flex items-center gap-1.5 text-[#00c0e8] dark:text-[#38bdf8] hover:text-[#007f99] dark:hover:text-[#7dd3fc] font-normal text-xs group transition-colors"
             >
               <span className="underline underline-offset-4 decoration-[#00c0e8]/30 group-hover:decoration-[#00c0e8]">
-                See more experience
+                See all {experiences.length} experience
               </span>
               <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
             </Link>

@@ -92,8 +92,37 @@ export default function Widgets() {
     document.addEventListener('visibilitychange', handleVisibility);
 
     // 2. Real-time Device Online / Offline Firestore listener on analytics/device
+    // Threshold: 150 seconds (2.5 mins) to prevent flickering due to clock drift or network jitter
+    const ONLINE_THRESHOLD = 150 * 1000;
     let latestLastSeen = 0;
     let unsubscribe = () => {};
+
+    // Helper to sync status
+    const updatePresence = (timestamp: number) => {
+      if (!isMounted) return;
+      latestLastSeen = timestamp;
+      const online = Boolean(timestamp && Date.now() - timestamp < ONLINE_THRESHOLD);
+      setIsOnline(online);
+      setLastSeen(timestamp || null);
+      setRelativeTime(formatLastOnline(timestamp));
+    };
+
+    // Fallback REST fetch to /api/status
+    const fetchStatusApi = async () => {
+      try {
+        const res = await fetch('/api/status');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && typeof data.lastSeen === 'number') {
+            updatePresence(data.lastSeen);
+          }
+        }
+      } catch {}
+    };
+
+    fetchStatusApi();
+    const statusApiInterval = setInterval(fetchStatusApi, 30000);
+
     try {
       const docRef = doc(db, 'analytics', 'device');
       unsubscribe = onSnapshot(
@@ -101,21 +130,23 @@ export default function Widgets() {
         (snap) => {
           if (isMounted && snap.exists()) {
             const data = snap.data();
-            latestLastSeen = typeof data.lastSeen === 'number' ? data.lastSeen : 0;
-            const online = Boolean(latestLastSeen && Date.now() - latestLastSeen < 60 * 1000);
-            setIsOnline(online);
-            setLastSeen(latestLastSeen || null);
-            setRelativeTime(formatLastOnline(latestLastSeen));
+            const ts = typeof data.lastSeen === 'number' ? data.lastSeen : 0;
+            updatePresence(ts);
           }
         },
-        () => {}
+        () => {
+          // If Firestore listener fails or ad-blocker blocks it, fallback API keeps running
+          fetchStatusApi();
+        }
       );
-    } catch {}
+    } catch {
+      fetchStatusApi();
+    }
 
     // Periodic check every 5s to refresh relative time & update online/offline threshold
     const checkInterval = setInterval(() => {
       if (isMounted && latestLastSeen > 0) {
-        const online = Date.now() - latestLastSeen < 60 * 1000;
+        const online = Date.now() - latestLastSeen < ONLINE_THRESHOLD;
         setIsOnline(online);
         setRelativeTime(formatLastOnline(latestLastSeen));
       }
@@ -125,6 +156,7 @@ export default function Widgets() {
       isMounted = false;
       clearInterval(spotifyInterval);
       clearInterval(checkInterval);
+      clearInterval(statusApiInterval);
       document.removeEventListener('visibilitychange', handleVisibility);
       unsubscribe();
     };

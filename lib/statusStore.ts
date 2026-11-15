@@ -11,8 +11,9 @@ let memoryStatus: LaptopStatus = {
   lastSeen: 0,
 };
 
-// Threshold for considering laptop online: 60 seconds (laptop sends pulse every 20 seconds)
-const ONLINE_THRESHOLD_MS = 60 * 1000;
+// Threshold for considering laptop online: 2.5 minutes (laptop sends pulse every 15 seconds)
+// Prevents flickering offline due to slight clock drift, WiFi lag, or Windows background timer throttling
+const ONLINE_THRESHOLD_MS = 150 * 1000;
 
 export async function getLaptopStatus(): Promise<LaptopStatus> {
   const now = Date.now();

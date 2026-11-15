@@ -29,16 +29,35 @@ export default function Certifications() {
     return () => unsub();
   }, []);
 
+  // Show top 3 certifications on homepage; full list viewable on /certifications
+  const displayedCerts = certs.slice(0, 3);
+
   return (
     <section className="pt-10 pb-6">
       <FadeIn>
-        <h2 className="font-serif text-3xl sm:text-4xl font-normal tracking-tight text-gray-900 dark:text-white mb-6">
-          Certifications
-        </h2>
+        <div className="flex items-end justify-between mb-6">
+          <div>
+            <h2 className="font-serif text-3xl sm:text-4xl font-normal tracking-tight text-gray-900 dark:text-white mb-1.5">
+              Certifications
+            </h2>
+            <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-500 font-sans">
+              Professional credentials and cloud specializations.
+            </p>
+          </div>
+          {certs.length > 3 && (
+            <Link
+              href="/certifications"
+              className="text-xs sm:text-sm font-mono text-[#007f99] dark:text-[#38bdf8] hover:underline flex items-center gap-1 group pb-1"
+            >
+              <span>See all ({certs.length})</span>
+              <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+            </Link>
+          )}
+        </div>
 
         {/* Content list without blue line */}
         <div className="relative space-y-4">
-          {certs.map((c, idx) => (
+          {displayedCerts.map((c, idx) => (
             <div key={c.id || idx} className="flex items-center gap-3.5 group">
               <div
                 className={`relative w-10 h-10 rounded-lg p-2 shrink-0 flex items-center justify-center border transition-all ${
@@ -70,13 +89,13 @@ export default function Certifications() {
           ))}
 
           {/* See more link */}
-          <div className="pt-1">
+          <div className="pt-2">
             <Link
               href="/certifications"
-              className="inline-flex items-center gap-1 text-[#00c0e8] dark:text-[#38bdf8] hover:text-[#007f99] dark:hover:text-[#7dd3fc] font-normal text-xs group transition-colors"
+              className="inline-flex items-center gap-1.5 text-[#00c0e8] dark:text-[#38bdf8] hover:text-[#007f99] dark:hover:text-[#7dd3fc] font-normal text-xs group transition-colors"
             >
               <span className="underline underline-offset-4 decoration-[#00c0e8]/30 group-hover:decoration-[#00c0e8]">
-                See all certifications
+                See all {certs.length} certifications
               </span>
               <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
             </Link>

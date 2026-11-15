@@ -31,6 +31,7 @@ export default function Blogs() {
   }, []);
 
   const featured = blogs[0] || DEFAULT_BLOGS[0];
+  const secondaryBlogs = blogs.slice(1, 3);
 
   return (
     <section id="blogs" className="pt-10 pb-6">
@@ -49,87 +50,140 @@ export default function Blogs() {
             href="/blogs"
             className="text-xs sm:text-sm font-mono text-[#007f99] dark:text-[#38bdf8] hover:underline flex items-center gap-1 group pb-1"
           >
-            <span>See more</span>
+            <span>See all {blogs.length > 1 ? `(${blogs.length})` : ''}</span>
             <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
 
         {/* Featured Post Card */}
-        <article className="p-6 sm:p-7 rounded-2xl bg-white/70 dark:bg-[#10131a]/70 border border-gray-200/80 dark:border-gray-800/80 backdrop-blur-sm shadow-sm hover:border-gray-300 dark:hover:border-gray-700 transition-all space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-gray-400 dark:text-gray-500">
-            <div className="flex items-center gap-3">
-              {featured.date && (
-                <span className="flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5" />
-                  {featured.date}
-                </span>
-              )}
-              {featured.readTime && (
-                <>
-                  <span>·</span>
+        <div className="space-y-4">
+          <article className="p-6 sm:p-7 rounded-2xl bg-white/70 dark:bg-[#10131a]/70 border border-gray-200/80 dark:border-gray-800/80 backdrop-blur-sm shadow-sm hover:border-gray-300 dark:hover:border-gray-700 transition-all space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-gray-400 dark:text-gray-500">
+              <div className="flex items-center gap-3">
+                {featured.date && (
                   <span className="flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5" />
-                    {featured.readTime}
+                    <Calendar className="w-3.5 h-3.5" />
+                    {featured.date}
                   </span>
-                </>
-              )}
+                )}
+                {featured.readTime && (
+                  <>
+                    <span>·</span>
+                    <span className="flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5" />
+                      {featured.readTime}
+                    </span>
+                  </>
+                )}
+              </div>
+
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium text-[11px] border border-emerald-500/20">
+                <FaMedium className="w-3 h-3" />
+                <span>{featured.platform || 'Article'}</span>
+              </div>
             </div>
 
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium text-[11px] border border-emerald-500/20">
-              <FaMedium className="w-3 h-3" />
-              <span>{featured.platform || 'Article'}</span>
+            <h3 className="font-serif text-2xl sm:text-[26px] font-normal text-gray-900 dark:text-white leading-snug">
+              <LinkPreview
+                url={featured.href}
+                title={featured.title}
+                className="hover:text-[#00c0e8] transition-colors"
+              >
+                {featured.title}
+              </LinkPreview>
+            </h3>
+
+            {featured.summary && (
+              <p className="text-sm text-gray-600 dark:text-gray-300 font-sans leading-relaxed">
+                {featured.summary}
+              </p>
+            )}
+
+            {/* Tags */}
+            {featured.tags && featured.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {featured.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="px-2.5 py-1 rounded-md text-[11px] font-mono bg-gray-100 dark:bg-[#151924] text-gray-600 dark:text-gray-400 border border-gray-200/60 dark:border-gray-800/60"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Action Row */}
+            <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-800/80">
+              <LinkPreview
+                url={featured.href}
+                title={`Read on ${featured.platform || 'Medium'}`}
+                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-mono text-[#007f99] dark:text-[#38bdf8] hover:underline font-medium"
+              >
+                <span>Read on {featured.platform || 'Medium'}</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </LinkPreview>
+
+              <Link
+                href="/blogs"
+                className="text-xs font-mono text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+              >
+                View in dedicated page →
+              </Link>
             </div>
-          </div>
+          </article>
 
-          <h3 className="font-serif text-2xl sm:text-[26px] font-normal text-gray-900 dark:text-white leading-snug">
-            <LinkPreview
-              url={featured.href}
-              title={featured.title}
-              className="hover:text-[#00c0e8] transition-colors"
-            >
-              {featured.title}
-            </LinkPreview>
-          </h3>
-
-          {featured.summary && (
-            <p className="text-sm text-gray-600 dark:text-gray-300 font-sans leading-relaxed">
-              {featured.summary}
-            </p>
-          )}
-
-          {/* Tags */}
-          {featured.tags && featured.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 pt-1">
-              {featured.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="px-2.5 py-1 rounded-md text-[11px] font-mono bg-gray-100 dark:bg-[#151924] text-gray-600 dark:text-gray-400 border border-gray-200/60 dark:border-gray-800/60"
+          {/* Secondary 2nd and 3rd blogs on Homepage */}
+          {secondaryBlogs.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {secondaryBlogs.map((b, idx) => (
+                <article
+                  key={b.id || idx}
+                  className="p-5 rounded-xl bg-white/60 dark:bg-[#10131a]/60 border border-gray-200/70 dark:border-gray-800/70 backdrop-blur-sm shadow-sm hover:border-gray-300 dark:hover:border-gray-700 transition-all flex flex-col justify-between"
                 >
-                  #{tag}
-                </span>
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between text-[11px] font-mono text-gray-400">
+                      <span>{b.date}</span>
+                      <span>{b.readTime}</span>
+                    </div>
+                    <h4 className="font-serif text-lg font-normal text-gray-900 dark:text-white line-clamp-2 hover:text-[#00c0e8] transition-colors">
+                      <LinkPreview url={b.href} title={b.title}>
+                        {b.title}
+                      </LinkPreview>
+                    </h4>
+                    {b.summary && (
+                      <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 font-sans">
+                        {b.summary}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="pt-3 mt-3 border-t border-gray-100 dark:border-gray-800/60 flex items-center justify-between text-xs">
+                    <span className="text-[11px] text-gray-400 font-mono">{b.platform}</span>
+                    <LinkPreview url={b.href} title={b.title} className="text-[#007f99] dark:text-[#38bdf8] hover:underline font-mono inline-flex items-center gap-1">
+                      <span>Read</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </LinkPreview>
+                  </div>
+                </article>
               ))}
             </div>
           )}
 
-          {/* Action Row */}
-          <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-800/80">
-            <LinkPreview
-              url={featured.href}
-              title={`Read on ${featured.platform || 'Medium'}`}
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-mono text-[#007f99] dark:text-[#38bdf8] hover:underline font-medium"
-            >
-              <span>Read on {featured.platform || 'Medium'}</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </LinkPreview>
-
-            <Link
-              href="/blogs"
-              className="text-xs font-mono text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-            >
-              View in dedicated page →
-            </Link>
-          </div>
-        </article>
+          {blogs.length > 3 && (
+            <div className="pt-2">
+              <Link
+                href="/blogs"
+                className="inline-flex items-center gap-1.5 text-[#00c0e8] dark:text-[#38bdf8] hover:text-[#007f99] dark:hover:text-[#7dd3fc] font-normal text-xs group transition-colors"
+              >
+                <span className="underline underline-offset-4 decoration-[#00c0e8]/30 group-hover:decoration-[#00c0e8]">
+                  See all {blogs.length} articles
+                </span>
+                <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </div>
+          )}
+        </div>
       </FadeIn>
     </section>
   );
