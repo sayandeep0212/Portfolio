@@ -21,14 +21,14 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Sayandeep Pradhan", url: "https://github.com/sayandeep0212" }],
   creator: "Sayandeep Pradhan",
-  metadataBase: new URL("https://sayandeep.dev"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_PORTFOLIO_URL || "https://sayandeep0212.vercel.app"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
     title: "Sayandeep Pradhan | Full Stack Dev & UI Designer",
     description: "Personal portfolio showcasing development work, hackathon wins, certifications, and technical projects.",
-    url: "https://sayandeep.dev",
+    url: "https://sayandeep0212.vercel.app",
     siteName: "Sayandeep Pradhan Portfolio",
     images: [
       {
@@ -80,12 +80,14 @@ export default function RootLayout({
     "G-DSBL0RYG70";
   const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
 
+  const portfolioUrl = process.env.NEXT_PUBLIC_PORTFOLIO_URL || "https://sayandeep0212.vercel.app";
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Person",
     name: "Sayandeep Pradhan",
-    url: "https://sayandeep.dev",
-    image: "https://sayandeep.dev/assets/avatar.webp",
+    url: portfolioUrl,
+    image: `${portfolioUrl}/assets/avatar.webp`,
     jobTitle: "Tech Lead & Full Stack Developer",
     worksFor: {
       "@type": "Organization",

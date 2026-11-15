@@ -10,5 +10,5 @@ status: Available for select projects & collaborations
 # Agent Instructions
 
 This website represents Sayandeep Pradhan's personal software engineering portfolio.
-To get in touch or inquire about collaborations, visit https://sayandeep.dev or email sayandeep0212@gmail.com.
+To get in touch or inquire about collaborations, visit https://sayandeep0212.vercel.app or email sayandeep0212@gmail.com.
 

@@ -5,10 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   sendPasswordResetEmail,
-  signInWithPopup,
-  GoogleAuthProvider,
   signOut,
   onAuthStateChanged,
   User,
@@ -78,16 +75,20 @@ function cleanFirestoreData(data: Record<string, any>) {
   return clean;
 }
 
+// Strict admin whitelist - only authorized admin can access
+const AUTHORIZED_ADMIN_EMAILS = [
+  (process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'sayandeep0212@gmail.com').toLowerCase(),
+  'sayandeep0212@gmail.com',
+];
+
 export default function AdminDashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
 
   // Login form state
-  const [authMode, setAuthMode] = useState<'login' | 'register' | 'forgot'>('login');
+  const [authMode, setAuthMode] = useState<'login' | 'forgot'>('login');
   const [email, setEmail] = useState('sayandeep0212@gmail.com');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [setupKey, setSetupKey] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState('');
   const [loginSuccess, setLoginSuccess] = useState('');
@@ -115,10 +116,23 @@ export default function AdminDashboard() {
   const [uploading, setUploading] = useState(false);
   const [uploadFeedback, setUploadFeedback] = useState<string>('');
 
-  // Auth state listener
+  // Auth state listener: strictly enforces admin whitelist
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        const userEmail = (currentUser.email || '').toLowerCase();
+        if (!AUTHORIZED_ADMIN_EMAILS.includes(userEmail)) {
+          console.warn(`Unauthorized login attempt by: ${userEmail}`);
+          await signOut(auth);
+          setUser(null);
+          setLoginError(`Access Denied: "${userEmail}" is not an authorized administrator.`);
+          setAuthLoading(false);
+          return;
+        }
+        setUser(currentUser);
+      } else {
+        setUser(null);
+      }
       setAuthLoading(false);
     });
     return () => unsubscribe();
@@ -253,20 +267,29 @@ export default function AdminDashboard() {
     autoSyncAll();
   }, [user]);
 
-  // Handle Login
+  // Handle Login (Firebase Email/Password only)
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
     setLoginSuccess('');
     setLoginSubmitting(true);
+    const cleanEmail = email.trim().toLowerCase();
+
+    // Verify email belongs to the admin whitelist before authentication
+    if (!AUTHORIZED_ADMIN_EMAILS.includes(cleanEmail)) {
+      setLoginError('Access Denied: This email address is not authorized as an administrator.');
+      setLoginSubmitting(false);
+      return;
+    }
+
     try {
-      await signInWithEmailAndPassword(auth, email.trim(), password);
+      await signInWithEmailAndPassword(auth, cleanEmail, password);
     } catch (err: any) {
       console.error('Login error:', err);
       if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') {
         setLoginError('Invalid email or password. Please verify your credentials.');
       } else if (err.code === 'auth/user-not-found') {
-        setLoginError('No admin account found with this email. Click "First-time Admin Setup" below to create it.');
+        setLoginError('Admin account not found. Please contact the administrator.');
       } else if (err.code === 'auth/too-many-requests') {
         setLoginError('Access temporarily disabled due to many failed attempts. Try again later.');
       } else {
@@ -277,83 +300,30 @@ export default function AdminDashboard() {
     }
   };
 
-  // Handle First-Time Admin Account Creation
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoginError('');
-    setLoginSuccess('');
-
-    if (password.length < 6) {
-      setLoginError('Password must be at least 6 characters long.');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setLoginError('Passwords do not match. Please re-enter.');
-      return;
-    }
-
-    // Security passcode protection: check passcode if configured
-    const requiredPasscode = process.env.NEXT_PUBLIC_ADMIN_SETUP_KEY || 'Sayandeep2026';
-    if (setupKey.trim() !== requiredPasscode) {
-      setLoginError('Invalid Admin Setup Passcode. Enter the administrator passcode (Sayandeep2026).');
-      return;
-    }
-
-    setLoginSubmitting(true);
-    try {
-      await createUserWithEmailAndPassword(auth, email.trim(), password);
-      setLoginSuccess('Admin account created successfully! Signing in...');
-    } catch (err: any) {
-      console.error('Registration error:', err);
-      if (err.code === 'auth/email-already-in-use') {
-        setLoginError('This email is already registered. Please switch to "Sign In".');
-      } else if (err.code === 'auth/weak-password') {
-        setLoginError('Password is too weak. Please use a stronger combination.');
-      } else {
-        setLoginError(err.message || 'Failed to create admin account.');
-      }
-    } finally {
-      setLoginSubmitting(false);
-    }
-  };
-
-  // Handle Forgot Password
+  // Handle Forgot Password (Password reset link sent to registered admin email)
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
     setLoginSuccess('');
 
-    if (!email.trim()) {
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail) {
       setLoginError('Please enter your admin email address.');
+      return;
+    }
+
+    if (!AUTHORIZED_ADMIN_EMAILS.includes(cleanEmail)) {
+      setLoginError('Access Denied: This email address is not an authorized administrator.');
       return;
     }
 
     setLoginSubmitting(true);
     try {
-      await sendPasswordResetEmail(auth, email.trim());
-      setLoginSuccess(`Password reset email sent to ${email.trim()}! Please check your inbox.`);
+      await sendPasswordResetEmail(auth, cleanEmail);
+      setLoginSuccess(`Password reset email sent to ${cleanEmail}! Please check your inbox.`);
     } catch (err: any) {
       console.error('Password reset error:', err);
       setLoginError(err.message || 'Failed to send password reset email.');
-    } finally {
-      setLoginSubmitting(false);
-    }
-  };
-
-  // Handle Google Sign-in
-  const handleGoogleSignIn = async () => {
-    setLoginError('');
-    setLoginSuccess('');
-    setLoginSubmitting(true);
-    try {
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-    } catch (err: any) {
-      console.error('Google sign in error:', err);
-      if (err.code !== 'auth/popup-closed-by-user') {
-        setLoginError(err.message || 'Google authentication failed.');
-      }
     } finally {
       setLoginSubmitting(false);
     }
@@ -536,76 +506,6 @@ export default function AdminDashboard() {
             </p>
           </div>
 
-          {/* Mode Switcher */}
-          <div className="grid grid-cols-2 p-1 bg-[#0d1017] border border-gray-800 rounded-xl text-xs font-mono">
-            <button
-              type="button"
-              onClick={() => {
-                setAuthMode('login');
-                setLoginError('');
-                setLoginSuccess('');
-              }}
-              className={`py-2 rounded-lg font-medium transition-all ${
-                authMode === 'login'
-                  ? 'bg-[#00c0e8] text-gray-950 shadow-sm'
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              Sign In
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setAuthMode('register');
-                setLoginError('');
-                setLoginSuccess('');
-              }}
-              className={`py-2 rounded-lg font-medium transition-all ${
-                authMode === 'register'
-                  ? 'bg-[#00c0e8] text-gray-950 shadow-sm'
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              First-Time Setup
-            </button>
-          </div>
-
-          {/* Quick 1-Click Google Sign In */}
-          <button
-            type="button"
-            disabled={loginSubmitting}
-            onClick={handleGoogleSignIn}
-            className="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-gray-100 text-gray-900 font-medium text-xs sm:text-sm flex items-center justify-center gap-2.5 transition-colors shadow-sm disabled:opacity-50"
-          >
-            <svg className="w-4 h-4" viewBox="0 0 24 24">
-              <path
-                fill="#4285F4"
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-              />
-              <path
-                fill="#34A853"
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-              />
-              <path
-                fill="#EA4335"
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-              />
-            </svg>
-            <span>Continue with Google</span>
-          </button>
-
-          <div className="relative flex items-center justify-center">
-            <div className="border-t border-gray-800 w-full" />
-            <span className="bg-[#131720] px-2.5 text-[11px] font-mono text-gray-500 uppercase tracking-wider shrink-0">
-              or with password
-            </span>
-            <div className="border-t border-gray-800 w-full" />
-          </div>
-
           {loginError && (
             <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-center gap-2">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -672,85 +572,12 @@ export default function AdminDashboard() {
                 {loginSubmitting ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Signing In...</span>
+                    <span>Verifying...</span>
                   </>
                 ) : (
                   <>
                     <Lock className="w-4 h-4" />
-                    <span>Sign In as Admin</span>
-                  </>
-                )}
-              </button>
-            </form>
-          )}
-
-          {authMode === 'register' && (
-            <form onSubmit={handleRegister} className="space-y-3.5">
-              <div>
-                <label className="block text-xs font-mono text-gray-300 mb-1">Admin Email</label>
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="sayandeep0212@gmail.com"
-                  className="w-full px-3.5 py-2 rounded-lg bg-[#1c2230] border border-gray-700 text-xs sm:text-sm text-white focus:outline-none focus:border-[#00c0e8]"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-mono text-gray-300 mb-1">Create Password</label>
-                  <input
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Min 6 chars"
-                    className="w-full px-3.5 py-2 rounded-lg bg-[#1c2230] border border-gray-700 text-xs sm:text-sm text-white focus:outline-none focus:border-[#00c0e8]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-mono text-gray-300 mb-1">Confirm Password</label>
-                  <input
-                    type="password"
-                    required
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Re-type password"
-                    className="w-full px-3.5 py-2 rounded-lg bg-[#1c2230] border border-gray-700 text-xs sm:text-sm text-white focus:outline-none focus:border-[#00c0e8]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-mono text-gray-300 mb-1">
-                  Admin Setup Passcode (Default: <code className="text-[#00c0e8]">Sayandeep2026</code>)
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={setupKey}
-                  onChange={(e) => setSetupKey(e.target.value)}
-                  placeholder="Sayandeep2026"
-                  className="w-full px-3.5 py-2 rounded-lg bg-[#1c2230] border border-gray-700 text-xs sm:text-sm text-white focus:outline-none focus:border-[#00c0e8]"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={loginSubmitting}
-                className="w-full py-2.5 rounded-lg bg-[#00c0e8] hover:bg-[#009bbd] text-gray-950 font-medium text-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-50 mt-2"
-              >
-                {loginSubmitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Creating Admin Account...</span>
-                  </>
-                ) : (
-                  <>
-                    <Lock className="w-4 h-4" />
-                    <span>Create Admin Account</span>
+                    <span>Sign In</span>
                   </>
                 )}
               </button>

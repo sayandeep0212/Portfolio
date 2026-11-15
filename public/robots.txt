@@ -1,5 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /api/
 
-Sitemap: https://sayandeep.dev/sitemap.xml
+Sitemap: https://sayandeep0212.vercel.app/sitemap.xml
 

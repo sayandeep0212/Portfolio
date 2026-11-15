@@ -324,14 +324,6 @@ export default function Footer() {
             <a href="/robots.txt" className="hover:text-gray-900 dark:hover:text-white transition-colors">
               robots.txt
             </a>
-            <span>·</span>
-            <a href="/admin" className="hover:text-gray-900 dark:hover:text-white transition-colors">
-              admin
-            </a>
-            <span>·</span>
-            <a href="https://sayandeep.dev" className="hover:text-gray-900 dark:hover:text-white transition-colors">
-              sayandeep0212.dev
-            </a>
           </div>
         </div>
       </div>

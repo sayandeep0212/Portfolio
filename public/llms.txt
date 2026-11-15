@@ -9,7 +9,7 @@
 - Interests: AI, Cybersecurity, Game Development, Full Stack Systems
 
 ## Contact
-- Website: https://sayandeep.dev
+- Website: https://sayandeep0212.vercel.app
 - Email: sayandeep0212@gmail.com
 - GitHub: https://github.com/sayandeep0212
 - LinkedIn: https://www.linkedin.com/in/sayandeep0212/
