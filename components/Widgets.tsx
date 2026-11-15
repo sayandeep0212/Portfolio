@@ -92,8 +92,8 @@ export default function Widgets() {
     document.addEventListener('visibilitychange', handleVisibility);
 
     // 2. Real-time Device Online / Offline Firestore listener on analytics/device
-    // Threshold: 150 seconds (2.5 mins) to prevent flickering due to clock drift or network jitter
-    const ONLINE_THRESHOLD = 150 * 1000;
+    // Threshold: 7 minutes (laptop sends pulse once every 3 to 4 minutes)
+    const ONLINE_THRESHOLD = 7 * 60 * 1000;
     let latestLastSeen = 0;
     let unsubscribe = () => {};
 
@@ -107,7 +107,7 @@ export default function Widgets() {
       setRelativeTime(formatLastOnline(timestamp));
     };
 
-    // Fallback REST fetch to /api/status
+    // Fallback REST fetch to /api/status (runs every 3 minutes to conserve function invocations)
     const fetchStatusApi = async () => {
       try {
         const res = await fetch('/api/status');
@@ -121,7 +121,7 @@ export default function Widgets() {
     };
 
     fetchStatusApi();
-    const statusApiInterval = setInterval(fetchStatusApi, 30000);
+    const statusApiInterval = setInterval(fetchStatusApi, 180000);
 
     try {
       const docRef = doc(db, 'analytics', 'device');

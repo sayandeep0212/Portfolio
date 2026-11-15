@@ -40,13 +40,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const TARGET_URLS = [
-  'http://localhost:3000',
-  process.env.NEXT_PUBLIC_PORTFOLIO_URL,
-  'https://sayandeep0212.vercel.app',
-  'https://sayandeep.dev',
-  'https://sayandeep.tech',
-].filter(Boolean);
+// Single primary URL to notify (avoids multiplying requests across multiple domain aliases)
+const PRIMARY_URL = process.env.NEXT_PUBLIC_PORTFOLIO_URL || 'https://sayandeep0212.vercel.app';
+
+// 3.5 minutes interval (between 3 to 5 minutes as requested)
+// Keeps Vercel serverless invocations minimal (< 18 requests per hour total)
+const HEARTBEAT_INTERVAL_MS = 3.5 * 60 * 1000; 
 
 async function sendPulse() {
   const now = Date.now();
@@ -67,33 +66,31 @@ async function sendPulse() {
     console.log(`[${new Date().toLocaleTimeString()}] ✅ Laptop ONLINE heartbeat -> Firestore analytics/device (timestamp: ${now})`);
   } catch (dbErr) {
     console.error('Firestore write error:', dbErr.message);
-    // Immediate retry after 3s on error
+    // Immediate retry after 5s on error
     setTimeout(async () => {
       try {
         const docRef = doc(db, 'analytics', 'device');
         await setDoc(docRef, { lastSeen: Date.now(), device: 'Windows Laptop', platform: 'win32' }, { merge: true });
       } catch {}
-    }, 3000);
+    }, 5000);
   }
 
-  // 2. Also notify API heartbeat endpoint
-  for (const baseUrl of TARGET_URLS) {
-    try {
-      await fetch(`${baseUrl}/api/heartbeat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lastSeen: now }),
-        signal: AbortSignal.timeout(3000),
-      });
-    } catch {}
-  }
+  // 2. Notify single primary API heartbeat endpoint
+  try {
+    await fetch(`${PRIMARY_URL}/api/heartbeat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lastSeen: now }),
+      signal: AbortSignal.timeout(5000),
+    });
+  } catch {}
 }
 
 // Initial pulse immediately
 sendPulse();
 
-// Repeat pulse every 15 seconds (keeps status reliably online without gaps)
-const interval = setInterval(sendPulse, 15000);
+// Repeat pulse once every 3.5 minutes (reduces Vercel API calls to ~17/hr while keeping status 100% online)
+const interval = setInterval(sendPulse, HEARTBEAT_INTERVAL_MS);
 
 process.on('SIGINT', () => {
   clearInterval(interval);
