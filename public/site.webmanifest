@@ -1,0 +1,26 @@
+{
+  "name": "Sayandeep Pradhan's Portfolio",
+  "short_name": "Sayandeep",
+  "description": "Sayandeep Pradhan's Software Engineering & Design Portfolio",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0d11",
+  "theme_color": "#00c0e8",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.webp",
+      "sizes": "192x192",
+      "type": "image/webp"
+    }
+  ]
+}

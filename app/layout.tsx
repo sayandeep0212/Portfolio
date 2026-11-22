@@ -4,10 +4,16 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  applicationName: "Sayandeep Pradhan's Portfolio",
   title: "Sayandeep Pradhan | Full Stack Dev & UI Designer",
   description: "Computer Science Engineering student passionate about Full Stack Development, AI, and Cloud Technologies. Tech Lead at GameLiminals & Google Student Ambassador.",
   verification: {
     google: "cf4Xkiblsr-E7v7hHNbBGdRATGamFPyZ3hg22A8NUHI",
+  },
+  manifest: "/site.webmanifest",
+  appleWebApp: {
+    title: "Sayandeep Pradhan's Portfolio",
+    statusBarStyle: "black-translucent",
   },
   keywords: [
     "Sayandeep Pradhan",
@@ -29,7 +35,7 @@ export const metadata: Metadata = {
     title: "Sayandeep Pradhan | Full Stack Dev & UI Designer",
     description: "Personal portfolio showcasing development work, hackathon wins, certifications, and technical projects.",
     url: "https://sayandeep0212.vercel.app",
-    siteName: "Sayandeep Pradhan Portfolio",
+    siteName: "Sayandeep Pradhan's Portfolio",
     images: [
       {
         url: "/assets/hero-banner.webp",
@@ -85,44 +91,68 @@ export default function RootLayout({
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Person",
-    name: "Sayandeep Pradhan",
-    url: portfolioUrl,
-    image: `${portfolioUrl}/assets/avatar.webp`,
-    jobTitle: "Tech Lead & Full Stack Developer",
-    worksFor: {
-      "@type": "Organization",
-      name: "GameLiminals",
-    },
-    alumniOf: {
-      "@type": "CollegeOrUniversity",
-      name: "Adamas University",
-    },
-    sameAs: [
-      "https://github.com/sayandeep0212",
-      "https://www.linkedin.com/in/sayandeep0212/",
-      "https://x.com/sayandeep0212",
-      "https://www.instagram.com/sayandeep0212/",
-      "https://www.youtube.com/@SayandeepPradhan",
-      "https://www.facebook.com/PradhanSayandeep",
-      "https://medium.com/@sayandeep0212",
-    ],
-    knowsAbout: [
-      "Full Stack Development",
-      "React",
-      "Next.js",
-      "TypeScript",
-      "Tailwind CSS",
-      "Node.js",
-      "Cybersecurity",
-      "UI/UX Design",
-    ],
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": `${portfolioUrl}/#website`,
+        url: portfolioUrl,
+        name: "Sayandeep Pradhan's Portfolio",
+        alternateName: [
+          "Sayandeep Pradhan Portfolio",
+          "Sayandeep's Portfolio",
+          "Sayandeep Portfolio"
+        ],
+        description: "Personal portfolio showcasing development work, hackathon wins, certifications, and technical projects.",
+        inLanguage: "en-US",
+        publisher: {
+          "@id": `${portfolioUrl}/#person`
+        }
+      },
+      {
+        "@type": "Person",
+        "@id": `${portfolioUrl}/#person`,
+        name: "Sayandeep Pradhan",
+        url: portfolioUrl,
+        image: `${portfolioUrl}/assets/avatar.webp`,
+        jobTitle: "Tech Lead & Full Stack Developer",
+        worksFor: {
+          "@type": "Organization",
+          name: "GameLiminals",
+        },
+        alumniOf: {
+          "@type": "CollegeOrUniversity",
+          name: "Adamas University",
+        },
+        sameAs: [
+          "https://github.com/sayandeep0212",
+          "https://www.linkedin.com/in/sayandeep0212/",
+          "https://x.com/sayandeep0212",
+          "https://www.instagram.com/sayandeep0212/",
+          "https://www.youtube.com/@SayandeepPradhan",
+          "https://www.facebook.com/PradhanSayandeep",
+          "https://medium.com/@sayandeep0212",
+        ],
+        knowsAbout: [
+          "Full Stack Development",
+          "React",
+          "Next.js",
+          "TypeScript",
+          "Tailwind CSS",
+          "Node.js",
+          "Cybersecurity",
+          "UI/UX Design",
+        ],
+      }
+    ]
   };
 
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <meta name="google-site-verification" content="cf4Xkiblsr-E7v7hHNbBGdRATGamFPyZ3hg22A8NUHI" />
+        <meta name="application-name" content="Sayandeep Pradhan's Portfolio" />
+        <meta name="apple-mobile-web-app-title" content="Sayandeep Pradhan's Portfolio" />
+        <link rel="manifest" href="/site.webmanifest" />
         <link rel="icon" href="/favicon.webp" type="image/webp" />
         <link rel="alternate icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/favicon.webp" />
