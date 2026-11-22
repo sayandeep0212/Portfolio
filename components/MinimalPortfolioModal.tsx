@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useEffect, ReactNode } from 'react';
+import React, { useEffect, useState, ReactNode } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MapPin, Mail, ExternalLink } from 'lucide-react';
 import { FaGithub, FaLinkedinIn, FaXTwitter, FaFacebookF } from 'react-icons/fa6';
 import { cn } from '@/lib/utils';
+import { playBookOpenSound } from '@/lib/sounds';
 import { ChanhDaiMark } from './chanhdai-mark';
 import {
   Foldable,
@@ -118,29 +119,256 @@ export default function MinimalPortfolioModal({
             transition={{ type: 'spring', damping: 25, stiffness: 220 }}
             className="relative z-10 w-full max-w-3xl flex flex-col items-center my-auto"
           >
-            {/* Foldable Component System */}
-            <Foldable className="[--foldable-radius:--spacing(6)]">
-              {/* A container one page wide: sizes follow the page, not the screen. */}
-              <FoldableStage className="@container/foldable">
-                <FoldableInsideRight>
-                  <SpreadHalf side="right">
-                    <InnerView />
-                  </SpreadHalf>
-                </FoldableInsideRight>
-                <FoldableCover>
-                  <OuterView />
-                </FoldableCover>
-                <FoldableInsideLeft>
-                  <SpreadHalf side="left">
-                    <InnerView />
-                  </SpreadHalf>
-                </FoldableInsideLeft>
-              </FoldableStage>
-            </Foldable>
+            {/* Mobile View (< md / mobile phones): Perfectly fitted, responsive single booklet card */}
+            <div className="block md:hidden w-full max-w-[360px] sm:max-w-[400px]">
+              <MobileBookletView />
+            </div>
+
+            {/* Desktop View (>= md): Interactive 3D Dual-Page Foldable */}
+            <div className="hidden md:block w-full">
+              <Foldable className="[--foldable-radius:--spacing(6)]">
+                {/* A container one page wide: sizes follow the page, not the screen. */}
+                <FoldableStage className="@container/foldable">
+                  <FoldableInsideRight>
+                    <SpreadHalf side="right">
+                      <InnerView />
+                    </SpreadHalf>
+                  </FoldableInsideRight>
+                  <FoldableCover>
+                    <OuterView />
+                  </FoldableCover>
+                  <FoldableInsideLeft>
+                    <SpreadHalf side="left">
+                      <InnerView />
+                    </SpreadHalf>
+                  </FoldableInsideLeft>
+                </FoldableStage>
+              </Foldable>
+            </div>
           </motion.div>
         </div>
       )}
     </AnimatePresence>
+  );
+}
+
+/** Responsive Mobile Booklet View: Fits standard mobile screens without horizontal overflow or clipped text */
+function MobileBookletView() {
+  const [activeTab, setActiveTab] = useState<'profile' | 'experience'>('profile');
+
+  const handleTabChange = (tab: 'profile' | 'experience') => {
+    if (tab !== activeTab) {
+      playBookOpenSound();
+      setActiveTab(tab);
+    }
+  };
+
+  return (
+    <div className="w-full rounded-2xl bg-white dark:bg-[#121622] border border-gray-200 dark:border-gray-800 shadow-2xl overflow-hidden flex flex-col text-gray-900 dark:text-gray-100">
+      {/* Top Banner with Night / Pixel Art look */}
+      <div className="relative h-28 w-full overflow-hidden bg-gray-900 shrink-0">
+        <Image
+          src="/assets/hero-banner-dark.webp"
+          alt="Profile banner"
+          fill
+          className="object-cover"
+          sizes="400px"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/20" />
+        <ChanhDaiMark className="absolute right-3 top-3 h-5 w-10 opacity-80" />
+      </div>
+
+      {/* Avatar & Page Indicator */}
+      <div className="relative z-10 px-4 -mt-10 flex items-end justify-between shrink-0">
+        <div className="relative size-20 rounded-full border-4 border-white dark:border-[#121622] shadow-xl overflow-hidden bg-gray-800 shrink-0 ring-2 ring-black/5 dark:ring-white/10">
+          <img
+            src={PROFILE.avatar}
+            alt={PROFILE.displayName}
+            className="size-full object-cover"
+            draggable={false}
+          />
+        </div>
+        <div className="flex items-center gap-1.5 mb-1">
+          <span className="font-mono text-[10px] text-[#007f99] dark:text-[#38bdf8] bg-[#00c0e8]/10 border border-[#00c0e8]/20 px-2 py-0.5 rounded-full font-medium">
+            {activeTab === 'profile' ? 'Page 1 of 2' : 'Page 2 of 2'}
+          </span>
+        </div>
+      </div>
+
+      {/* Name & Title */}
+      <div className="px-4 pt-2">
+        <h3 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white leading-tight">
+          {PROFILE.displayName}
+        </h3>
+        <p className="text-xs text-[#007f99] dark:text-[#38bdf8] font-medium mt-0.5">
+          {PROFILE.jobTitle}
+        </p>
+      </div>
+
+      {/* Segmented Tab Bar */}
+      <div className="grid grid-cols-2 p-1 mx-4 mt-3 bg-gray-100 dark:bg-[#0b0e14] border border-gray-200 dark:border-gray-800/80 rounded-xl text-xs font-mono shrink-0">
+        <button
+          type="button"
+          onClick={() => handleTabChange('profile')}
+          className={cn(
+            'py-1.5 rounded-lg font-medium transition-all text-center',
+            activeTab === 'profile'
+              ? 'bg-[#00c0e8] text-gray-950 shadow-sm font-semibold'
+              : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+          )}
+        >
+          Profile & Bio
+        </button>
+        <button
+          type="button"
+          onClick={() => handleTabChange('experience')}
+          className={cn(
+            'py-1.5 rounded-lg font-medium transition-all text-center',
+            activeTab === 'experience'
+              ? 'bg-[#00c0e8] text-gray-950 shadow-sm font-semibold'
+              : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+          )}
+        >
+          Experience & Work
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      <div className="flex-1 overflow-y-auto px-4 py-3 max-h-[55vh]">
+        {activeTab === 'profile' ? (
+          <div className="space-y-3">
+            <div>
+              <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                {PROFILE.bio}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5 font-mono mt-2">
+                <MapPin className="w-3.5 h-3.5 text-[#00c0e8] shrink-0" />
+                {PROFILE.address}
+              </p>
+            </div>
+
+            <div className="pt-2 border-t border-gray-100 dark:border-gray-800">
+              <p className="font-mono text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2 font-medium">
+                Connect
+              </p>
+              <div className="grid grid-cols-2 gap-1.5 text-[11px] font-mono">
+                <a
+                  href={PROFILE.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 p-2 rounded-lg bg-gray-50 dark:bg-gray-800/60 hover:text-black dark:hover:text-white border border-gray-100 dark:border-gray-800 transition-colors"
+                >
+                  <FaGithub className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">GitHub</span>
+                </a>
+                <a
+                  href={PROFILE.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 p-2 rounded-lg bg-gray-50 dark:bg-gray-800/60 hover:text-[#0077b5] border border-gray-100 dark:border-gray-800 transition-colors"
+                >
+                  <FaLinkedinIn className="w-3.5 h-3.5 shrink-0 text-[#0077b5]" />
+                  <span className="truncate">LinkedIn</span>
+                </a>
+                <a
+                  href={PROFILE.twitter}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 p-2 rounded-lg bg-gray-50 dark:bg-gray-800/60 hover:text-[#1da1f2] border border-gray-100 dark:border-gray-800 transition-colors"
+                >
+                  <FaXTwitter className="w-3.5 h-3.5 shrink-0 text-[#1da1f2]" />
+                  <span className="truncate">Twitter</span>
+                </a>
+                <a
+                  href={PROFILE.facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 p-2 rounded-lg bg-gray-50 dark:bg-gray-800/60 hover:text-[#1877F2] border border-gray-100 dark:border-gray-800 transition-colors"
+                >
+                  <FaFacebookF className="w-3.5 h-3.5 shrink-0 text-[#1877F2]" />
+                  <span className="truncate">Facebook</span>
+                </a>
+                <a
+                  href={`mailto:${PROFILE.email}`}
+                  className="col-span-2 flex items-center justify-center gap-1.5 p-2 rounded-lg bg-gray-50 dark:bg-gray-800/60 hover:text-[#00c0e8] border border-gray-100 dark:border-gray-800 transition-colors"
+                >
+                  <Mail className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                  <span className="truncate">{PROFILE.email}</span>
+                </a>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => handleTabChange('experience')}
+              className="w-full mt-2 py-2 px-3 rounded-xl bg-gray-100 dark:bg-gray-800/80 hover:bg-[#00c0e8]/10 text-xs font-mono text-[#007f99] dark:text-[#38bdf8] flex items-center justify-between border border-gray-200 dark:border-gray-700/60 transition-colors cursor-pointer"
+            >
+              <span>View Experience & Featured</span>
+              <span>→</span>
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-3.5">
+            <div>
+              <p className="font-mono text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wider font-semibold mb-2">
+                Experience
+              </p>
+              <ul className="space-y-1.5">
+                {EXPERIENCES.map((exp) => (
+                  <li
+                    key={exp.org}
+                    className="p-2.5 rounded-lg bg-gray-50 dark:bg-[#0d111a] border border-gray-100 dark:border-gray-800/80"
+                  >
+                    <div className="flex items-center justify-between text-xs font-medium">
+                      <span className="text-gray-900 dark:text-white font-semibold">
+                        {exp.org}
+                      </span>
+                      <span className="font-mono text-[10px] text-gray-400 dark:text-gray-500 tabular-nums">
+                        {exp.date}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[#007f99] dark:text-[#38bdf8] mt-0.5">
+                      {exp.role}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <p className="font-mono text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wider font-semibold mb-1.5">
+                Featured Highlights
+              </p>
+              <ul className="space-y-1.5">
+                {HIGHLIGHTS.map((h) => (
+                  <li key={h.title}>
+                    <a
+                      href={h.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-[#0d111a] hover:bg-gray-100 dark:hover:bg-[#151b28] border border-gray-100 dark:border-gray-800/80 text-xs text-gray-700 dark:text-gray-300 hover:text-[#00c0e8] transition-colors group"
+                    >
+                      <span className="truncate pr-2">{h.title}</span>
+                      <ExternalLink className="w-3 h-3 shrink-0 text-gray-400 group-hover:text-[#00c0e8] transition-colors" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => handleTabChange('profile')}
+              className="w-full mt-2 py-2 px-3 rounded-xl bg-gray-100 dark:bg-gray-800/80 hover:bg-[#00c0e8]/10 text-xs font-mono text-[#007f99] dark:text-[#38bdf8] flex items-center justify-between border border-gray-200 dark:border-gray-700/60 transition-colors cursor-pointer"
+            >
+              <span>← Back to Profile</span>
+              <span>Page 1 of 2</span>
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
